@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>MasterBot client view</title>
+  <title>MasterBot Remote Controller</title>
 
   <meta name="description" content="Source code generated using layoutit.com">
   <meta name="author" content="Vitor Viana">
@@ -41,11 +41,12 @@
           <div class="col-md-4">
             <textarea id="_logger" rows="10" cols="60">
             </textarea>
-            <button>clean</button>
+            <button id="btnClean" type="button" class="btn btn-danger">Clean</button>
+            <input type="checkbox" class="style3"/> latency
           </div>
           <div class="col-md-3">
             <section>
-              <a href="#" id="button">&#xF011;</a>
+              <a href="#" id="button2">&#xF011;</a>
               <span></span>
             </section>
           </div>
@@ -71,6 +72,10 @@
           callbackView.renderSprite();
         }, 0);
       });
+      joystickView.bind("_evtLogger", function(message) {
+        var text = $('#_logger').val();
+        $("#_logger").html(text + '\n' + message);
+      });
       joystickView.bind("verticalMove", function(y) {
         $("#yVal").html(y);
       });
@@ -83,12 +88,23 @@
   <!-- Aply on/off button (left)  -->
   <script type="text/javascript">
 		$(document).ready(function(){
+      $('#button2').on('click', function(){
+				$(this).toggleClass('on');
+			});
 			$('#button').on('click', function(){
 				$(this).toggleClass('on');
 			});
+      $('#btnClean').on('click', function(){
+        $("#_logger").html('');
+      });
+      $('input[type="checkbox"].style3').checkbox({
+        buttonStyle: 'btn-danger',
+    	  buttonStyleChecked: 'btn-success',
+        checkedClass: 'icon-check',
+        uncheckedClass: 'icon-check-empty'
+    });
 		});
 	</script>
-
 
 </body>
 

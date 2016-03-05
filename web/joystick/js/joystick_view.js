@@ -72,13 +72,14 @@ JoystickView = Backbone.View.extend({
     this._loopSocketProcess = setInterval(
       function () {
         if (self._xPercent != self._lastSentX || self._yPercent != self._lastSentY) {
-          console.log('will sent do socket x ', self._xPercent, ' y : ', self._yPercent);
+          var logger = "move to | x : "+self._xPercent + " y: " + self._yPercent ;
+          self.trigger('_evtLogger',logger); ;
           self._sentToSocket(self._xPercent, self._yPercent, function (err, x, y) {
             self._lastSentX = x;
             self._lastSentY = y;
           });
         } else {
-          console.log('no new values on x and y');
+          console.log('No new values on x and y');
         }
       }, frameUpdate);
   },

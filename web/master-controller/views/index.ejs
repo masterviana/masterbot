@@ -1,34 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>MasterBot Remote Controller</title>
-
   <meta name="description" content="Source code generated using layoutit.com">
   <meta name="author" content="Vitor Viana">
-
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
   <link rel="stylesheet" href="css/style2.css">
-
 </head>
 
 <body>
-
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-12">
         <div class="row">
           <div class="col-md-3">
-
             <script type="text/html" id="joystick-view">
               <canvas id="joystickCanvas" width="<%= squareSize %>" height="<%= squareSize %>" style="width: <%= squareSize %>px; height: <%= squareSize %>px;">
               </canvas>
             </script>
-
             <div id="joystickContent">
             </div>
             <div>
@@ -36,7 +28,6 @@
               <br/> y: <span id="yVal"></span>
               <br/>
             </div>
-
           </div>
           <div class="col-md-4">
             <textarea id="_logger" rows="10" cols="60">

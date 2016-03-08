@@ -61,11 +61,11 @@ var carl = multiplexer.registerChannel('carl');
 carl.on('connection', function(conn) {
     conn.write('Carl says goodbye!');
     // Explicitly cancel connection
-    conn.end();
+    // conn.end();
 });
 
 
-sockjs_echo.installHandlers(server, {prefix:'/echo'});
+sockjs_echo.installHandlers(server, {prefix:'/multiplex'});
 
 
 /**

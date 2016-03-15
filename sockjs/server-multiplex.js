@@ -13,20 +13,28 @@ var service = sockjs.createServer(sockjs_opts);
 // 2. Setup multiplexing
 var multiplexer = new websocket_multiplex.MultiplexServer(service);
 
-var connPush = []
+// var connPush = []
+// var ann = multiplexer.registerChannel('ann');
+// ann.on('connection', function(conn) {
+//    connPush.push(conn);
+//    for (var i in connPush) {
+//       var _conn = connPush[i];
+//       _conn.write('Ann says hi!');
+//     }
+//
+//     conn.on('data', function(data) {
+//       for (var i in connPush) {
+//          var _conn = connPush[i];
+//          _conn.write('Ann nods: ' + data);
+//        }
+//     });
+// });
+
 var ann = multiplexer.registerChannel('ann');
 ann.on('connection', function(conn) {
-   connPush.push(conn);
-   for (var i in connPush) {
-      var _conn = connPush[i];
-      _conn.write('Ann says hi!');
-    }
-
+    conn.write('Ann doesn\'t agree.');
     conn.on('data', function(data) {
-      for (var i in connPush) {
-         var _conn = connPush[i];
-         _conn.write('Ann nods: ' + data);
-       }
+        conn.write('Ann says no to: ' + data);
     });
 });
 

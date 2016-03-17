@@ -8,6 +8,10 @@ var INACTIVE = 0;
 var ACTIVE = 1;
 var SECONDS_INACTIVE = 0.5;
 
+var SEND_DIRECTION_COMMANDS = 'red'
+var LATENCY = '_LATENCY'
+
+
 function loadSprite (src, callback) {
   var sprite = new Image();
   sprite.onload = callback;
@@ -39,12 +43,19 @@ JoystickView = Backbone.View.extend({
     this._lastSentX = 0;
     this._lastSentY = 0;
     console.log('radius ', this.radius, ' squareSize ', this.squareSize);
-
     this.finishedLoadCallback = finishedLoadCallback;
     this.joyStickLoaded = false;
     this.backgroundLoaded = false;
     this.lastTouch = new Date().getTime();
     self = this;
+
+    var sockjs_url = 'http://localhost:9999/multiplex';
+    this.sockjs = new SockJS(sockjs_url);
+    this.roomClient = new WebSocketMultiplex(this.sockjs);
+    this.channels = {};
+    this.registerChannel(SEND_DIRECTION_COMMANDS);
+    this.registerChannel(LATENCY);
+
     setTimeout(function () {
       self._retractJoystickForInactivity();
     }, 1000);
@@ -83,7 +94,7 @@ JoystickView = Backbone.View.extend({
       function () {
         if (self._xPercent != self._lastSentX || self._yPercent != self._lastSentY) {
           var logger = "move to | x : "+self._xPercent + " y: " + self._yPercent ;
-          self.trigger('_evtLogger',logger); ;
+          // self.trigger('_evtLogger',logger);
           self._sentToSocket(self._xPercent, self._yPercent, function (err, x, y) {
             self._lastSentX = x;
             self._lastSentY = y;
@@ -93,7 +104,29 @@ JoystickView = Backbone.View.extend({
         }
       }, frameUpdate);
   },
+  registerChannel : function(channel){
+    var self = this;
+    this.channels[channel] = {}
+    this.channels[channel] = this.roomClient.channel(channel);
+    this.channels[channel].onopen = function(){
+      self.trigger('_evtLogger','channel '+ channel + ' was open');
+    }
+    this.channels[channel].onclose = function(){
+      self.trigger('_evtLogger','channel '+ channel + ' was close');
+
+    }
+    this.channels[channel].onmessage = function(msg){
+      console.log("message was arrived on socket");
+      var message = 'data on channel '+ channel + ' with data : ';
+      self.trigger('_evtLogger', message );
+    }
+
+  },
   _sentToSocket: function (x, y, callback) {
+    var msg = 'x : '+x+ ' y : ' + y;
+    var sendObj = {type:'controller',x : x,y :y}
+    console.log('send to socket ', JSON.stringify(sendObj));
+    this.channels[SEND_DIRECTION_COMMANDS].send(JSON.stringify(sendObj) );
     callback(null, x, y);
   },
   _tryCallback: function () {

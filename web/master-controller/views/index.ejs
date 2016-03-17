@@ -60,7 +60,13 @@
 <!-- Apply joystick area with backbone (rigth) -->
   <script type="text/javascript">
     $(document).ready(function() {
-      var joystickView = new JoystickView(180, function(callbackView) {
+      var configurations = {}
+      configurations.port = '<%= port %>'
+      configurations.prefix = '<%= prefix %>'
+      configurations.host = '<%= host %>'
+
+
+      var joystickView = new JoystickView(180, configurations, function(callbackView) {
         $("#joystickContent").append(callbackView.render().el);
         setTimeout(function() {
           callbackView.renderSprite();
@@ -92,12 +98,7 @@
       $('#btnClean').on('click', function(){
         $("#_logger").html('');
       });
-      $('input[type="checkbox"].style3').checkbox({
-        buttonStyle: 'btn-danger',
-    	  buttonStyleChecked: 'btn-success',
-        checkedClass: 'icon-check',
-        uncheckedClass: 'icon-check-empty'
-    });
+
 		});
 	</script>
 

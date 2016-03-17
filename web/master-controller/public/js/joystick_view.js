@@ -8,8 +8,8 @@ var INACTIVE = 0;
 var ACTIVE = 1;
 var SECONDS_INACTIVE = 0.5;
 
-var SEND_DIRECTION_COMMANDS = 'red'
-var LATENCY = '_LATENCY'
+var SEND_DIRECTION_COMMANDS = 'DIRECTIONAL_COMMANDS'
+var LATENCY = '_LATENCY_RESULT'
 
 
 function loadSprite (src, callback) {
@@ -28,7 +28,7 @@ JoystickView = Backbone.View.extend({
     'mouseup': 'endControl',
     'mousemove': 'move'
   },
-  initialize: function (squareSize, finishedLoadCallback) {
+  initialize: function (squareSize, configurations, finishedLoadCallback) {
     this.squareSize = squareSize;
     this.template = _.template($('#joystick-view').html());
     this.state = INACTIVE;
@@ -47,9 +47,15 @@ JoystickView = Backbone.View.extend({
     this.joyStickLoaded = false;
     this.backgroundLoaded = false;
     this.lastTouch = new Date().getTime();
+    this.configuration = configurations;
     self = this;
 
-    var sockjs_url = 'http://localhost:9999/multiplex';
+    console.log("configuration loaded from server :: ");
+    console.log(configurations);
+
+    // var sockjs_url = 'http://localhost:'+this.configuration.port+this.configuration.prefix;
+    var sockjs_url = 'http://'+this.configuration.host+':'+this.configuration.port+this.configuration.prefix
+
     this.sockjs = new SockJS(sockjs_url);
     this.roomClient = new WebSocketMultiplex(this.sockjs);
     this.channels = {};
@@ -109,23 +115,21 @@ JoystickView = Backbone.View.extend({
     this.channels[channel] = {}
     this.channels[channel] = this.roomClient.channel(channel);
     this.channels[channel].onopen = function(){
-      self.trigger('_evtLogger','channel '+ channel + ' was open');
+      //  self.trigger('_evtLogger','channel '+ channel + ' was open');
     }
     this.channels[channel].onclose = function(){
       self.trigger('_evtLogger','channel '+ channel + ' was close');
 
     }
     this.channels[channel].onmessage = function(msg){
-      console.log("message was arrived on socket");
-      var message = 'data on channel '+ channel + ' with data : ';
+      var message = channel +':'+  msg.data;
       self.trigger('_evtLogger', message );
     }
 
   },
   _sentToSocket: function (x, y, callback) {
     var msg = 'x : '+x+ ' y : ' + y;
-    var sendObj = {type:'controller',x : x,y :y}
-    console.log('send to socket ', JSON.stringify(sendObj));
+    var sendObj = {type:'ctl',x : x,y :y}
     this.channels[SEND_DIRECTION_COMMANDS].send(JSON.stringify(sendObj) );
     callback(null, x, y);
   },

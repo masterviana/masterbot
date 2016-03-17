@@ -7,7 +7,16 @@
 var app = require('../app');
 var debug = require('debug')('master-controller:server');
 var http = require('http');
+var config = require('../config/config.json');
 var roomServer = require('../lib/socket-manager.js');
+
+/*
+  load configuration to a global object
+*/
+
+GLOBAL.service = Object.create(null);
+GLOBAL.service.configuration = config;
+
 
 /**
  * Get port from environment and store in Express.

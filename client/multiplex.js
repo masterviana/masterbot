@@ -1,28 +1,52 @@
-var websocket_multiplex = require('./multiplex-client-nodejs.js');
-var sjsc = require('sockjs-client-ws');
+var room = require('sockjs-rooms').client;
+var roomClient = new room("http://bot.vviana.com/multiplex");
 
+var latency = roomClient.channel("latency");
+latency.on("message",function(message){
+  var startDate = +new Date();
+  var backMessage = JSON.parse(message.data);
+  if(backMessage && backMessage ){
+    var endDate = +new Date();
+    var diff = endDate - startDate;
+    console.log("latency is ",diff,'ms');
+  }
+});
 
-var client = sjsc.create("http://localhost:3000/multiplex");
+setInterval(function(){
+  var start = +new Date();
+  var message = { type:1, startTime : start }
+  latency.send(JSON.stringify(message));
+},500);
 
-var multiplexer = new websocket_multiplex(client);
-var ann = multiplexer.channel('ann');
-var bob = multiplexer.channel('bob');
-var carl = multiplexer.channel('carl');
+var red = roomClient.channel("red");
+red.on('open',function(){});
+red.on('close',function(){});
+red.on('message',function(message){
+  console.log('channel:Red data : ',message)
+});
 
+setInterval(function(){
+  red.send("send message to red from nodejs client");
+},900);
 
-function startChannels(ws,channel){
-  // ws.connection    = function()  {console.log('[*] open', ws.protocol);};
-  // ws.onmessage = function(e) {console.log('[.] message', e.data);};
-  // ws.onclose   = function()  {console.log('[*] close');};
+var bob = roomClient.channel("bob");
+bob.on('open',function(){});
+bob.on('close',function(){});
+bob.on('message',function(message){
+  console.log('channel:Bob data : ',message)
+});
 
-  // setInterval(function(){
-  //   console.log("emit new message ", ws);
-  //    ws.send("sent message from channel client nodejs"  );
-  // },2000);
+setInterval(function(){
+  bob.send("send message to bob from nodejs client");
+},600);
 
-}
+var carl = roomClient.channel("carl");
+carl.on('open',function(){});
+carl.on('close',function(){});
+carl.on('message',function(message){
+  console.log('channel:carl data : ',message)
+});
 
-startChannels(ann,"ann");
-
-
-console.log("hello");
+setInterval(function(){
+  carl.send("send message to bob from nodejs client");
+},500);

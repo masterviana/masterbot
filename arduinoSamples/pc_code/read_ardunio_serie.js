@@ -16,9 +16,8 @@ sp.on("data", function (data) {
   console.log("here: "+data);
 });
 
-
-var obj = {x : 200, y : 100}
-
-setTimeout(function(){
-  sp.write(JSON.stringify(obj));
-},2500);
+var obj = {x : 200, y : 100};
+var commandFormat = '111/222|333/444;'
+setInterval(function(){
+  sp.write(commandFormat);
+},3000);

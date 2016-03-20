@@ -24,8 +24,14 @@ int BIN2 = 12; //Direction
 int DIRECTION = 0;
 int SPEED     = 0;
 
-int x;
 String str;
+
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// constants won't change :
+const long interval = 1000;           // interval at which to blink (milliseconds)
+
+
 
 void setup(){
 
@@ -43,31 +49,35 @@ void setup(){
 }
 
 void loop(){
-
+  
+  //unsigned long currentMillis = millis();
+  
   if(Serial.available() > 0)
   {
       str = Serial.readStringUntil('\n');
-      StaticJsonBuffer<200> jsonBuffer;
-      JsonObject& root = jsonBuffer.parseObject(str);
-      DIRECTION = root["direction"];
-      SPEED = root["speed"];
+      //StaticJsonBuffer<200> jsonBuffer;
+      //JsonObject& root = jsonBuffer.parseObject(str);
+      //DIRECTION = root["direction"];
+      //SPEED = root["speed"];
 
       Serial.print("I received ");
-      Serial.print(str);
-      Serial.println(SPEED);
+      Serial.println(str);
+      //Serial.println(SPEED);
+      //Serial.flush();
   
   }else{
-    Serial.print("SPEED ");
-    Serial.println(SPEED);
-    Serial.println("No data was received! ");
+     //Serial.print("SPEED ");
+     Serial.println(SPEED);
+    //Serial.println("No data was received! ");
+    //Serial.flush();
   }
-  
+
   
   move(1, SPEED, DIRECTION); //motor 1, full speed, left
   move(2, SPEED, DIRECTION); //motor 2, full speed, left
 
-  delay(400);
-  
+  delay(250);
+ 
 }
 
 

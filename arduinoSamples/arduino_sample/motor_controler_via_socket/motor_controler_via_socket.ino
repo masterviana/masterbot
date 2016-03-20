@@ -1,13 +1,8 @@
-#include <ArduinoJson.h>
-
 
 /*
     CODE FOR TB6612FNG
     from blog post : http://bildr.org/2012/04/tb6612fng-arduino/
 */
-
-//motor A connected between A01 and A02
-//motor B connected between B01 and B02
 
 int STBY = 10; //standby
 
@@ -21,16 +16,28 @@ int PWMB = 5; //Speed control
 int BIN1 = 11; //Direction
 int BIN2 = 12; //Direction
 
-int DIRECTION = 0;
-int SPEED     = 0;
 
-String str;
+/*
+   COMMANDS TEMPLATE
+   "m1Speed/m1Direction|m2Speed/m2Direction;"
 
-unsigned long previousMillis = 0;        // will store last time LED was updated
+   Commands variables
+*/
+int m1_speed = 0;
+int m2_speed = 0;
+int m1_direction = 0;
+int m2_direction = 0;
+
+/*
+ * variables to read commands from serial port
+*/
+char rx_byte = 0;
+String rx_str = "";
+
+unsigned long previousMillis = 0;    
 
 // constants won't change :
-const long interval = 1000;           // interval at which to blink (milliseconds)
-
+const long interval = 50;    
 
 
 void setup(){
@@ -49,37 +56,93 @@ void setup(){
 }
 
 void loop(){
-  
-  //unsigned long currentMillis = millis();
-  
-  if(Serial.available() > 0)
-  {
-      str = Serial.readStringUntil('\n');
-      //StaticJsonBuffer<200> jsonBuffer;
-      //JsonObject& root = jsonBuffer.parseObject(str);
-      //DIRECTION = root["direction"];
-      //SPEED = root["speed"];
 
-      Serial.print("I received ");
-      Serial.println(str);
-      //Serial.println(SPEED);
-      //Serial.flush();
+ 
+  unsigned long currentMillis = millis();
+  //wait to read on commands in passive way
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    //will read inputs from serial port
+    getCommandInput();
   
-  }else{
-     //Serial.print("SPEED ");
-     Serial.println(SPEED);
-    //Serial.println("No data was received! ");
-    //Serial.flush();
   }
 
-  
-  move(1, SPEED, DIRECTION); //motor 1, full speed, left
-  move(2, SPEED, DIRECTION); //motor 2, full speed, left
-
-  delay(250);
+  //Stop motors if speed is zero
+  if(m1_speed == 0 && m2_speed == 0){
+    stop();
+  }else{
+    move(1, m1_speed, m1_direction); //motor 1, full speed, left
+    move(2, m2_speed, m2_direction); //motor 2, full speed, left
+  }
  
 }
 
+
+
+/*
+ *  Process commands sended from serial port
+*/
+void getCommandInput() {
+  rx_str = "";
+  int commandPart = 1;
+  int commandForMotor = 1;
+  String commandValue = "";
+
+  if (Serial.available() > 0) {
+    while (Serial.available() > 0) {
+      delay(5);
+      rx_byte = Serial.read();
+      rx_str += rx_byte;
+      switch (rx_byte) {
+        case '/':
+          if (commandForMotor == 1) {
+            m1_speed = commandValue.toInt();
+          } else if (commandForMotor == 2) {
+            m2_speed = commandValue.toInt();
+          }
+          commandValue = "";
+          commandPart = commandPart + 1;
+          break;
+        case '|':
+          if (commandForMotor == 1) {
+            m1_direction = commandValue.toInt();
+          }
+          commandValue = "";
+          commandForMotor = commandForMotor + 1;
+          commandPart = 1;
+          break;
+        case ';':
+          if (commandForMotor == 2) {
+            m2_direction = commandValue.toInt();
+          }
+          commandValue = "";
+          break;
+        default:
+          commandValue = commandValue + rx_byte;
+          break;
+      }
+    }
+    String commands = "M1Speed = ";
+    commands.concat(m1_speed);
+    commands.concat(" M1 diretino ");
+    commands.concat(m1_direction);
+    commands.concat(" M2 speed ");
+    commands.concat(m2_speed);
+    commands.concat("M2 direction ");
+    commands.concat(m2_direction);
+
+    Serial.println(rx_str);
+    Serial.println(commands);
+  } else {
+    Serial.println("No data from buffers");
+  }
+}
+
+
+/*
+  MOTORS  CODE 
+*/
 
 void move(int motor, int speed, int direction){
 //Move specific motor at speed and direction

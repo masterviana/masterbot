@@ -17,7 +17,7 @@ sp.on("data", function (data) {
 });
 
 var obj = {x : 200, y : 100};
-var commandFormat = '111/222|333/444;'
+  var commandFormat = '111/222|333/444;'
 setInterval(function(){
   sp.write(commandFormat);
-},3000);
+},2000);

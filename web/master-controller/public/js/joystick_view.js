@@ -95,7 +95,7 @@ JoystickView = Backbone.View.extend({
    */
   _processToSocket: function () {
     var self = this;
-    var frameUpdate = 250;
+    var frameUpdate = 200;
     this._loopSocketProcess = setInterval(
       function () {
         // if (self._xPercent != self._lastSentX || self._yPercent != self._lastSentY) {

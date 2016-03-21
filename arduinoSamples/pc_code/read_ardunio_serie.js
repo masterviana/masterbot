@@ -1,8 +1,3 @@
-// var SerialPort = require("serialport").SerialPort;
-// var serialport = new SerialPort("/dev/cu.usbmodemFD121", {
-//   baudrate: 9600,
-// });
-
 
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; // localize object constructor

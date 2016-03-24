@@ -3,6 +3,7 @@ var SerialPort = serialport.SerialPort; // localize object constructor
 var room = require('sockjs-rooms').client;
 var roomClient = new room("http://localhost:3000/multiplex");
 var debug = require('debug')('clientToArduino');
+var arduinoDebug = require('debug')('arduino');
 
 var sp = new SerialPort("/dev/cu.usbmodemFD121", {
    parser: serialport.parsers.readline("\n"),
@@ -10,7 +11,11 @@ var sp = new SerialPort("/dev/cu.usbmodemFD121", {
 });
 
 sp.on("data", function (data) {
-   //console.log("FROM ARDUINO: ", data);
+  var NO_COMMAND = "ND";
+  var COMMAND = "CM";
+   if(data.indexOf(COMMAND) > -1 ){
+     arduinoDebug("FROM ARDUINO: ", data);
+   }
 });
 
 
@@ -35,16 +40,17 @@ latency.on("message",function(message){
   socketCounts = socketCounts +1 ;
   var dataObject = JSON.parse(message.data);
 
-  var y_commands  = getSpeedAndDirection(dataObject.y);
-  var x_commands  = getSpeedAndDirection(dataObject.x);
+  var speedCommands  = tankdrive(dataObject.x, dataObject.y );
 
-  //console.log("y commands ", y_commands);
-  //console.log("x commands ", x_commands);
+  var lMotor =  getSpeedAndDirectionFromRelative(speedCommands.left);
+  var rMotor =  getSpeedAndDirectionFromRelative(speedCommands.right);
 
-  var commandsToSend = y_commands.speed+"/"+y_commands.direction+"|"+x_commands.speed+"/"+x_commands.direction+";";
+  debug( "LEFT_MOTOR "+ JSON.stringify(lMotor), " RIGTH_MOTOR "+ JSON.stringify(rMotor)  );
+
+  var commandsToSend = lMotor.speed+"/"+lMotor.dir+"|"+rMotor.speed+"/"+rMotor.dir+";";
   //pendingCommand = commandsToSend;
   // console.log("cmd is ",commandsToSend );
-  //sp.write(commandsToSend);
+  sp.write(commandsToSend);
 
 });
 
@@ -90,59 +96,42 @@ function tankdrive(x, y) {
         right = 0 - right;
     }
 
+    if(isNaN(left)){
+        left = 0 ;
+    }
+    if(isNaN(right)){
+        right = 0 ;
+    }
+
     return { left : left , right :right  };
 }
 
+/*
+   transform relative value on arduino values, for speed with direction
+*/
+function getSpeedAndDirectionFromRelative(value)
+{
+  var returnValues = {speed : 0 , dir : 0}
+  if(value == 0 ){
+    return returnValues;
+  }else{
+    //convert 0-255
+    //give the direction forward
+    if(value > 0 ){
+      var relativeSpeed = Math.abs(value);
+      returnValues.speed = relativeSpeed * 255
+      returnValues.speed = Math.floor(returnValues.speed)
+      returnValues.dir = 0;
+    }
+    //convert 0-255
+    //give the direction backward
+    else{
+      var relativeSpeed = Math.abs(value);
+      returnValues.speed = relativeSpeed * 255
+      returnValues.speed = Math.floor(returnValues.speed)
+      returnValues.dir = 1;
+    }
 
-
-
-
-// //grap y speed and direction
-// var y  = dataObject.y;
-// var y_direction = 0;
-// var y_speed = 0;
-//
-// if(y == 0){
-//   y_direction = 0;
-//   y_speed = 0;
-// }else{
-//   //go forward
-//   if(y > 0 ){
-//     y_direction = 0;
-//     var relativeSpeed = Math.abs(y);
-//     y_speed = relativeSpeed * 255
-//     y_speed = Math.floor(y_speed)
-//   }
-//   //go back
-//   else{
-//       y_direction = 1;
-//       var relativeSpeed = Math.abs(y);
-//       y_speed = relativeSpeed * 255
-//       y_speed =  Math.floor(y_speed)
-//   }
-// }
-//
-// //grap y speed and direction
-// var x  = dataObject.x;
-// var x_direction = 0;
-// var x_speed = 0;
-//
-// if(x == 0){
-//   x_direction = 0;
-//   x_speed = 0;
-// }else{
-//   //go forward
-//   if(x > 0 ){
-//     x_direction = 0;
-//     var relativeSpeed = Math.abs(x);
-//     x_speed = relativeSpeed * 255
-//     x_speed = Math.floor(x_speed)
-//   }
-//   //go back
-//   else{
-//       x_direction = 1;
-//       var relativeSpeed = Math.abs(x);
-//       x_speed = relativeSpeed * 255
-//       x_speed =  Math.floor(x_speed)
-//   }
-// }
+  }
+  return returnValues;
+}

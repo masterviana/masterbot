@@ -196,8 +196,8 @@ JoystickView = Backbone.View.extend({
     this._xPercent = xPercent;
     this._yPercent = yPercent;
     // console.log('trigger was changed x ', xPercent, ' y ', yPercent, ' counts ', this.countMoves);
-    this.trigger('horizontalMove', this.x);
-    this.trigger('verticalMove', this.y);
+    this.trigger('horizontalMove', this._xPercent);
+    this.trigger('verticalMove', this._yPercent );
   },
   _mutateToCartesian: function (x, y) {
     x -= (this.squareSize) / 2;
@@ -214,7 +214,6 @@ JoystickView = Backbone.View.extend({
     this.renderSprite();
   },
   _retractToMiddle: function () {
-    console.log('_retractToMiddle func ', this.isOnMidle);
     var percentLoss = 0.1;
     var toKeep = 1.0 - percentLoss;
 

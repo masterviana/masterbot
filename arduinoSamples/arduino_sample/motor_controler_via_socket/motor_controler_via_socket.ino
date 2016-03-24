@@ -23,10 +23,10 @@ int BIN2 = 12; //Direction
 
    Commands variables
 */
-int m1_speed = 0;
-int m2_speed = 0;
-int m1_direction = 0;
-int m2_direction = 0;
+int lMotor_speed = 0;
+int rMotor_speed = 0;
+int lMotor_dir = 0;
+int rMotor_dir = 0;
 
 /*
  * variables to read commands from serial port
@@ -37,7 +37,7 @@ String rx_str = "";
 unsigned long previousMillis = 0;    
 
 // constants won't change :
-const long interval = 50;    
+const long interval = 70;    
 
 
 void setup(){
@@ -69,11 +69,11 @@ void loop(){
   }
 
   //Stop motors if speed is zero
-  if(m1_speed == 0 && m2_speed == 0){
+  if(lMotor_speed == 0 && rMotor_speed == 0){
     stop();
   }else{
-    move(1, m1_speed, m1_direction); //motor 1, full speed, left
-    move(2, m2_speed, m2_direction); //motor 2, full speed, left
+    move(1, lMotor_speed, lMotor_dir); //motor 1, full speed, left
+    move(2, rMotor_speed, rMotor_dir); //motor 2, full speed, left
   }
  
 }
@@ -97,16 +97,16 @@ void getCommandInput() {
       switch (rx_byte) {
         case '/':
           if (commandForMotor == 1) {
-            m1_speed = commandValue.toInt();
+            lMotor_speed = commandValue.toInt();
           } else if (commandForMotor == 2) {
-            m2_speed = commandValue.toInt();
+            rMotor_speed = commandValue.toInt();
           }
           commandValue = "";
           commandPart = commandPart + 1;
           break;
         case '|':
           if (commandForMotor == 1) {
-            m1_direction = commandValue.toInt();
+            lMotor_dir = commandValue.toInt();
           }
           commandValue = "";
           commandForMotor = commandForMotor + 1;
@@ -114,7 +114,7 @@ void getCommandInput() {
           break;
         case ';':
           if (commandForMotor == 2) {
-            m2_direction = commandValue.toInt();
+            rMotor_dir = commandValue.toInt();
           }
           commandValue = "";
           break;
@@ -123,19 +123,19 @@ void getCommandInput() {
           break;
       }
     }
-    String commands = "M1Speed = ";
-    commands.concat(m1_speed);
-    commands.concat(" M1 diretino ");
-    commands.concat(m1_direction);
-    commands.concat(" M2 speed ");
-    commands.concat(m2_speed);
-    commands.concat("M2 direction ");
-    commands.concat(m2_direction);
+    String commands = "CM LMOTOR SPEED= ";
+    commands.concat(lMotor_speed);
+    commands.concat(" LMOTOR DIR ");
+    commands.concat(lMotor_dir);
+    commands.concat(" RMOTOR SPEED ");
+    commands.concat(rMotor_speed);
+    commands.concat("LMOTOR DIR ");
+    commands.concat(rMotor_dir);
 
-    Serial.println(rx_str);
+    //Serial.println(rx_str);
     Serial.println(commands);
   } else {
-    Serial.println("No data from buffers");
+    Serial.println("ND No data from buffers");
   }
 }
 

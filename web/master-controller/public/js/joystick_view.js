@@ -98,18 +98,18 @@ JoystickView = Backbone.View.extend({
     var frameUpdate = 180;
     this._loopSocketProcess = setInterval(
       function () {
-        if (self._xPercent != self._lastSentX || self._yPercent != self._lastSentY) {
-          var logger = "move to | x : "+self._xPercent + " y: " + self._yPercent ;
-          // self.trigger('_evtLogger',logger);
-          self._sentToSocket(self._xPercent, self._yPercent, function (err, x, y) {
-            self._lastSentX = x;
-            self._lastSentY = y;
-          });
-        } else {
-          console.log('No new values on x and y');
-        }
-        // self._sentToSocket(self._xPercent, self._yPercent, function (err, x, y) {
-        // });
+        // if (self._xPercent != self._lastSentX || self._yPercent != self._lastSentY) {
+        //   var logger = "move to | x : "+self._xPercent + " y: " + self._yPercent ;
+        //   // self.trigger('_evtLogger',logger);
+        //   self._sentToSocket(self._xPercent, self._yPercent, function (err, x, y) {
+        //     self._lastSentX = x;
+        //     self._lastSentY = y;
+        //   });
+        // } else {
+        //   console.log('No new values on x and y');
+        // }
+        self._sentToSocket(self._xPercent, self._yPercent, function (err, x, y) {
+        });
       }, frameUpdate);
   },
   registerChannel : function(channel){

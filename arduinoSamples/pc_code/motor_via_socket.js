@@ -1,20 +1,27 @@
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; // localize object constructor
+var evets = require('events');
 var room = require('sockjs-rooms').client;
 var roomClient = new room("http://localhost:3000/multiplex");
 var debug = require('debug')('clientToArduino');
 var arduinoDebug = require('debug')('arduino');
 
-var sp = new SerialPort("/dev/cu.usbmodemFD121", {
-   parser: serialport.parsers.readline("\n"),
-   baudrate: 9600
-});
+// var sp = new SerialPort("/dev/cu.usbmodemFA131", {
+//    parser: serialport.parsers.readline("\n"),
+//    baudrate: 9600
+// });
+var sp = new evets();
+
+var SPEED_MIN_PWM = 120;
+var SPEED_MAX_PWM = 255;
+var SPPED_DIFF_TOLERANCE = 0.25;
 
 sp.on("data", function (data) {
   var NO_COMMAND = "ND";
   var COMMAND = "CM";
    if(data.indexOf(COMMAND) > -1 ){
-     arduinoDebug("FROM ARDUINO: ", data);
+    //  arduinoDebug("FROM ARDUINO: ", data);
+    arduinoDebug("FROM ARDUINO " , data);
    }
 });
 
@@ -42,19 +49,44 @@ latency.on("message",function(message){
 
   var speedCommands  = tankdrive(dataObject.x, dataObject.y );
 
+  if(speedCommands.left != 0 && speedCommands.right != 0 ){
+    var speedDiff =  Math.abs(speedCommands.left - speedCommands.right);
+    if(speedDiff <= SPPED_DIFF_TOLERANCE){
+      debug("bellow speed difference tolerence, same value L and R");
+      speedCommands.right = speedCommands.left;
+    }
+
+  }
+
   var lMotor =  getSpeedAndDirectionFromRelative(speedCommands.left);
   var rMotor =  getSpeedAndDirectionFromRelative(speedCommands.right);
 
-  debug( "LEFT_MOTOR "+ JSON.stringify(lMotor), " RIGTH_MOTOR "+ JSON.stringify(rMotor)  );
+  console.log( "LEFT_MOTOR "+ JSON.stringify(lMotor), " RIGTH_MOTOR "+ JSON.stringify(rMotor)  );
+  // var commandsToSend = lMotor.speed+"/"+lMotor.dir+"|"+rMotor.speed+"/"+rMotor.dir+";";
 
-  var commandsToSend = lMotor.speed+"/"+lMotor.dir+"|"+rMotor.speed+"/"+rMotor.dir+";";
   //pendingCommand = commandsToSend;
   // console.log("cmd is ",commandsToSend );
-  sp.write(commandsToSend);
+  // sp.write(commandsToSend);
 
 });
 
 
+// var speed = 25;
+// var dir = 0;
+// setInterval(function(){
+//
+//   speed += 25;
+//   if(speed > 150){
+//     speed = 25 ;
+//   }
+//
+//   dir = dir == 0 ? 1 : 0;
+//   console.log("will send speed ", speed);
+//   var commandsToSend = speed+"/"+dir+"|"+speed+"/"+dir+";";
+//
+//   sp.write(commandsToSend);
+//
+// },1500);
 
 
 // Tankdrive function, that converts the x and y values
@@ -111,6 +143,8 @@ function tankdrive(x, y) {
 */
 function getSpeedAndDirectionFromRelative(value)
 {
+
+  var intervalDiff = SPEED_MAX_PWM - SPEED_MIN_PWM;
   var returnValues = {speed : 0 , dir : 0}
   if(value == 0 ){
     return returnValues;
@@ -119,7 +153,7 @@ function getSpeedAndDirectionFromRelative(value)
     //give the direction forward
     if(value > 0 ){
       var relativeSpeed = Math.abs(value);
-      returnValues.speed = relativeSpeed * 255
+      returnValues.speed = (relativeSpeed * intervalDiff) + SPEED_MIN_PWM;
       returnValues.speed = Math.floor(returnValues.speed)
       returnValues.dir = 0;
     }
@@ -127,7 +161,7 @@ function getSpeedAndDirectionFromRelative(value)
     //give the direction backward
     else{
       var relativeSpeed = Math.abs(value);
-      returnValues.speed = relativeSpeed * 255
+      returnValues.speed = (relativeSpeed * intervalDiff) + SPEED_MIN_PWM;
       returnValues.speed = Math.floor(returnValues.speed)
       returnValues.dir = 1;
     }

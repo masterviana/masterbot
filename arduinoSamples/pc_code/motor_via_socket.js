@@ -1,16 +1,16 @@
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; // localize object constructor
-var evets = require('events');
+// var evets = require('events');
 var room = require('sockjs-rooms').client;
 var roomClient = new room("http://localhost:3000/multiplex");
 var debug = require('debug')('clientToArduino');
 var arduinoDebug = require('debug')('arduino');
 
-// var sp = new SerialPort("/dev/cu.usbmodemFA131", {
-//    parser: serialport.parsers.readline("\n"),
-//    baudrate: 9600
-// });
-var sp = new evets();
+var sp = new SerialPort("/dev/cu.usbmodemFA131", {
+   parser: serialport.parsers.readline("\n"),
+   baudrate: 9600
+});
+// var sp = new evets();
 
 var SPEED_MIN_PWM = 120;
 var SPEED_MAX_PWM = 255;
@@ -62,11 +62,11 @@ latency.on("message",function(message){
   var rMotor =  getSpeedAndDirectionFromRelative(speedCommands.right);
 
   console.log( "LEFT_MOTOR "+ JSON.stringify(lMotor), " RIGTH_MOTOR "+ JSON.stringify(rMotor)  );
-  // var commandsToSend = lMotor.speed+"/"+lMotor.dir+"|"+rMotor.speed+"/"+rMotor.dir+";";
+  var commandsToSend = lMotor.speed+"/"+lMotor.dir+"|"+rMotor.speed+"/"+rMotor.dir+";";
 
-  //pendingCommand = commandsToSend;
+  // pendingCommand = commandsToSend;
   // console.log("cmd is ",commandsToSend );
-  // sp.write(commandsToSend);
+  sp.write(commandsToSend);
 
 });
 

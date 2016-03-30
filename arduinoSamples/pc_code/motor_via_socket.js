@@ -1,6 +1,6 @@
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; // localize object constructor
-// var evets = require('events');
+var evets = require('events');
 var room = require('sockjs-rooms').client;
 var roomClient = new room("http://localhost:3000/multiplex");
 var debug = require('debug')('clientToArduino');
@@ -12,9 +12,9 @@ var sp = new SerialPort("/dev/cu.usbmodemFA131", {
 });
 // var sp = new evets();
 
-var SPEED_MIN_PWM = 120;
-var SPEED_MAX_PWM = 255;
-var SPPED_DIFF_TOLERANCE = 0.25;
+var SPEED_MIN_PWM = 60;
+var SPEED_MAX_PWM = 130;
+var SPPED_DIFF_TOLERANCE = 0.1;
 
 sp.on("data", function (data) {
   var NO_COMMAND = "ND";
@@ -64,24 +64,37 @@ latency.on("message",function(message){
   console.log( "LEFT_MOTOR "+ JSON.stringify(lMotor), " RIGTH_MOTOR "+ JSON.stringify(rMotor)  );
   var commandsToSend = lMotor.speed+"/"+lMotor.dir+"|"+rMotor.speed+"/"+rMotor.dir+";";
 
-  // pendingCommand = commandsToSend;
+   pendingCommand = commandsToSend;
   // console.log("cmd is ",commandsToSend );
   sp.write(commandsToSend);
 
 });
 
 
-// var speed = 25;
-// var dir = 0;
+// var speed = 110;
+// var dir = 1;
+// var state = -1;
 // setInterval(function(){
 //
-//   speed += 25;
-//   if(speed > 150){
-//     speed = 25 ;
-//   }
+//   // speed += 30;
+//   // if(speed > 255){
+//   //   dir = dir == 0 ? 1 : 0;
+//   //   speed = 130 ;
+//   // }
+//   // state += 1;
+//   //
+//   // if(state == 0 ){
+//   //   dir = 0;
+//   // }else if(state == 1){
+//   //   dir = 1;
+//   // } else {
+//   //   dir = 0;
+//   //   speed = 0;
+//   //   state = 0;
+//   // }
 //
 //   dir = dir == 0 ? 1 : 0;
-//   console.log("will send speed ", speed);
+//   console.log("will send speed ", speed, ' dir ', dir);
 //   var commandsToSend = speed+"/"+dir+"|"+speed+"/"+dir+";";
 //
 //   sp.write(commandsToSend);

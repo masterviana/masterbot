@@ -13,8 +13,8 @@ int AIN2 = 8; //Direction
 
 //Motor B
 int PWMB = 6; //Speed control
-int BIN1 = 11; //Direction
-int BIN2 = 10; //Direction
+int BIN1 = 13; //Direction
+int BIN2 = 12; //Direction
 
 
 /*
@@ -183,6 +183,7 @@ void stop(){
    digitalWrite(BIN2, HIGH);
    digitalWrite(PWMB, 0);
 
+  Serial.println("motor Stopped");
     
 
 }

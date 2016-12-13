@@ -6,22 +6,24 @@ var roomClient = new room("http://localhost:3000/multiplex");
 var debug = require('debug')('clientToArduino');
 var arduinoDebug = require('debug')('arduino');
 
-var sp = new SerialPort("/dev/cu.usbmodemFA131", {
+var sp = new SerialPort("/dev/cu.usbmodemFD121", {
    parser: serialport.parsers.readline("\n"),
    baudrate: 9600
 });
 // var sp = new evets();
 
 var SPEED_MIN_PWM = 60;
-var SPEED_MAX_PWM = 130;
+var SPEED_MAX_PWM = 255;
 var SPPED_DIFF_TOLERANCE = 0.1;
 
 sp.on("data", function (data) {
   var NO_COMMAND = "ND";
   var COMMAND = "CM";
+  console.log("1. FROM ARDUINO " , data);
    if(data.indexOf(COMMAND) > -1 ){
     //  arduinoDebug("FROM ARDUINO: ", data);
-    arduinoDebug("FROM ARDUINO " , data);
+    //arduinoDebug("FROM ARDUINO " , data);
+    console.log("2 .FROM ARDUINO " , data);
    }
 });
 
